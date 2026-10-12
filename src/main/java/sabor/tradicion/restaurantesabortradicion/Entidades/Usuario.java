@@ -31,6 +31,7 @@ public class Usuario {
     @Column(nullable = false)
     private Rol rol;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reserva> reservas = new ArrayList<>();
 
