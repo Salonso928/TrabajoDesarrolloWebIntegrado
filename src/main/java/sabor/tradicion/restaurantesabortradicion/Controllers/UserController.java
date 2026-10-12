@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sabor.tradicion.restaurantesabortradicion.DTOs.UsuarioUpdateDTO;
+import sabor.tradicion.restaurantesabortradicion.DTOs.UsuarioDTO.UsuarioUpdateDTO;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Usuario;
 import sabor.tradicion.restaurantesabortradicion.Servicios.UserService;
 

@@ -1,5 +1,6 @@
 package sabor.tradicion.restaurantesabortradicion.Entidades;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import jakarta.persistence.*;
 

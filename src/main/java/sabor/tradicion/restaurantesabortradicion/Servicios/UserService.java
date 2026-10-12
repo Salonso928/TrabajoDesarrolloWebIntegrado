@@ -1,8 +1,8 @@
 package sabor.tradicion.restaurantesabortradicion.Servicios;
 
 import org.springframework.stereotype.Service;
-import sabor.tradicion.restaurantesabortradicion.DTOs.RegistroRequest;
-import sabor.tradicion.restaurantesabortradicion.DTOs.UsuarioUpdateDTO;
+import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.RegistroRequest;
+import sabor.tradicion.restaurantesabortradicion.DTOs.UsuarioDTO.UsuarioUpdateDTO;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Rol;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Usuario;
 import sabor.tradicion.restaurantesabortradicion.Repositorios.UsuarioRepository;

@@ -5,9 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import sabor.tradicion.restaurantesabortradicion.DTOs.LoginRequest;
-import sabor.tradicion.restaurantesabortradicion.DTOs.RegistroRequest;
-import sabor.tradicion.restaurantesabortradicion.DTOs.RespuestaAuth;
+import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.LoginRequest;
+import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.RegistroRequest;
+import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.RespuestaAuth;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Usuario;
 import sabor.tradicion.restaurantesabortradicion.Servicios.*;
 

@@ -1,8 +1,7 @@
-package sabor.tradicion.restaurantesabortradicion.DTOs;
+package sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 
 @AllArgsConstructor
 @Data

@@ -1,4 +1,4 @@
-package sabor.tradicion.restaurantesabortradicion.DTOs;
+package sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO;
 
 import lombok.Data;
 

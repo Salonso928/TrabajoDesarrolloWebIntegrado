@@ -2,8 +2,10 @@ package sabor.tradicion.restaurantesabortradicion.Servicios;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sabor.tradicion.restaurantesabortradicion.DTOs.MesaEstadoDTO;
-import sabor.tradicion.restaurantesabortradicion.DTOs.ReservaDTO;
+import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.CancelarReservaDTO;
+import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.MesaEstadoDTO;
+import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.ReservaRegistroDTO;
+import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.ReservaVistaDTO;
 import sabor.tradicion.restaurantesabortradicion.Entidades.EstadoMesa;
 import sabor.tradicion.restaurantesabortradicion.Entidades.EstadoReserva;
 import sabor.tradicion.restaurantesabortradicion.Entidades.HorarioTurno;
@@ -17,7 +19,6 @@ import sabor.tradicion.restaurantesabortradicion.Repositorios.UsuarioRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
@@ -55,34 +56,34 @@ public class ReservaService {
 
     }
 
-    public boolean realizarReserva(ReservaDTO reservaDTO) {
-        if (reservaDTO == null
-                || reservaDTO.idMesa() == null
-                || reservaDTO.idUsuario() == null
-                || reservaDTO.idHorarioTurno() == null
-                || reservaDTO.fecha() == null
-                || reservaDTO.nroPersonas() == null
-                || reservaDTO.nroPersonas() <= 0) {
+    public boolean realizarReserva(ReservaRegistroDTO reservaRegistroDTO) {
+        if (reservaRegistroDTO == null
+                || reservaRegistroDTO.idMesa() == null
+                || reservaRegistroDTO.idUsuario() == null
+                || reservaRegistroDTO.idHorarioTurno() == null
+                || reservaRegistroDTO.fecha() == null
+                || reservaRegistroDTO.nroPersonas() == null
+                || reservaRegistroDTO.nroPersonas() <= 0) {
             return false;
         }
 
         final LocalDate fecha;
         try {
-            fecha = LocalDate.parse(reservaDTO.fecha());
+            fecha = LocalDate.parse(reservaRegistroDTO.fecha());
         } catch (DateTimeParseException exception) {
             return false;
         }
 
-        Mesa mesa = mesaRepository.findById(reservaDTO.idMesa()).orElse(null);
-        Usuario usuario = usuarioRepository.findById(reservaDTO.idUsuario()).orElse(null);
+        Mesa mesa = mesaRepository.findById(reservaRegistroDTO.idMesa()).orElse(null);
+        Usuario usuario = usuarioRepository.findById(reservaRegistroDTO.idUsuario()).orElse(null);
         HorarioTurno horarioTurno =
-                horarioTurnoRepository.findById(reservaDTO.idHorarioTurno()).orElse(null);
+                horarioTurnoRepository.findById(reservaRegistroDTO.idHorarioTurno()).orElse(null);
 
         if (mesa == null
                 || usuario == null
                 || horarioTurno == null
                 || mesa.getEstado() == EstadoMesa.EN_MANTENIMIENTO
-                || mesa.getCapacidadMaxima() < reservaDTO.nroPersonas()) {
+                || mesa.getCapacidadMaxima() < reservaRegistroDTO.nroPersonas()) {
             return false;
         }
 
@@ -104,12 +105,46 @@ public class ReservaService {
         reserva.setUsuario(usuario);
         reserva.setFecha(fecha);
         reserva.setFechaDeReserva(LocalDateTime.now());
-        reserva.setNroPersonas(reservaDTO.nroPersonas());
+        reserva.setNroPersonas(reservaRegistroDTO.nroPersonas());
         reserva.setHorarioTurno(horarioTurno);
         reserva.setEstado(EstadoReserva.PENDIENTE);
         reservaRepository.save(reserva);
 
         return true;
+    }
+
+    public boolean cancelarReserva(CancelarReservaDTO cancelarReserva) {
+        Reserva reserva = reservaRepository.findById(cancelarReserva.idReserva()).orElse(null);
+        if (reserva == null || reserva.getEstado() == EstadoReserva.CANCELADA) {
+            //la reserva no existe o ya fue cancelada
+            return false;
+        }
+
+        if(!reserva.getUsuario().getIdUsuario().equals(cancelarReserva.idUsuario())) {
+            //La reserva no le pertenece al usuario que intenta cancelarla
+            return false;
+        }
+
+        reserva.setEstado(EstadoReserva.CANCELADA);
+        reservaRepository.save(reserva);
+        return true;
+    }
+
+    public ReservaVistaDTO verReserva(Long idReserva) {
+
+        var reservaVista = reservaRepository.findByIdConRelaciones(idReserva);
+
+        if(!reservaVista.isPresent()) return null;
+
+        return new ReservaVistaDTO(reservaVista.get());
+
+
+    }
+
+    public List<ReservaVistaDTO> verReservasPorFecha(LocalDate fecha) {
+        var reserva = reservaRepository.findByFecha(fecha);
+        return reserva.stream().map(ReservaVistaDTO::new).collect(Collectors.toList());
+
     }
 
     public List<HorarioTurno> getAllHorariosTurnos() {
