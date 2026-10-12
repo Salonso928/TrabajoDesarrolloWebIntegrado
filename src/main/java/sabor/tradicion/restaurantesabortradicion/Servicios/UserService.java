@@ -2,35 +2,79 @@ package sabor.tradicion.restaurantesabortradicion.Servicios;
 
 import org.springframework.stereotype.Service;
 import sabor.tradicion.restaurantesabortradicion.DTOs.RegistroRequest;
+import sabor.tradicion.restaurantesabortradicion.DTOs.UsuarioUpdateDTO;
+import sabor.tradicion.restaurantesabortradicion.Entidades.Rol;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Usuario;
+import sabor.tradicion.restaurantesabortradicion.Repositorios.UsuarioRepository;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 
 @Service
 public class UserService {
-    private final Map<String, Usuario> usuariosEnMemoria = new ConcurrentHashMap<>();
+    private final UsuarioRepository usuarioRepository;
 
-    public UserService() {
-        usuariosEnMemoria.put("cliente@sabor.com", new Usuario("cliente@sabor.com", "1234", "USER"));
-        usuariosEnMemoria.put("admin@sabor.com", new Usuario("admin@sabor.com", "1234", "ADMIN"));
-        usuariosEnMemoria.put("empleado@sabor.com", new Usuario("empleado@sabor.com", "1234", "EMPLOYEE"));
+    public UserService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
+
     public boolean registrarUsuario(RegistroRequest request) {
-        if (usuariosEnMemoria.containsKey(request.getEmail())) {
+        if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
             return false;
         }
-        //se crean usuarios por defecto, los otros roles son colocados por el admin
-        Usuario nuevoUsuario= new Usuario(request.getEmail(),request.getPassword(),"USER");
-        usuariosEnMemoria.put(request.getEmail(), nuevoUsuario);
+
+        // Los usuarios nuevos se registran como clientes; los otros roles los asigna un administrador.
+        Usuario nuevoUsuario = new Usuario(
+                request.getNombre(),
+                request.getEmail(),
+                request.getPassword(),
+                Rol.CLIENTE
+        );
+        usuarioRepository.save(nuevoUsuario);
         return true;
     }
 
     public Usuario validarCredenciales(String email, String password) {
-        Usuario usuario = usuariosEnMemoria.get(email);
-        if (usuario != null && usuario.getPassword().equals(password)) {
-            return usuario;
+        return usuarioRepository.findByEmail(email)
+                .filter(usuario -> usuario.getPassword().equals(password))
+                .orElse(null);
+    }
+
+    public List<Usuario> obtenerTodosLosUsuarios() {
+        return usuarioRepository.findAll();
+    }
+
+    public Usuario obtenerUsuarioPorId(Long id) {
+        return usuarioRepository.findById(id).orElse(null);
+    }
+
+    //en el DTO se traen los datos que se van a sobreescribir
+    public boolean actualizarDatos(UsuarioUpdateDTO usuario) {
+        Usuario usuarioExistente = usuarioRepository.findById(usuario.idUsuario()).orElse(null);
+        if (usuarioExistente == null) {
+            return false; // El usuario no existe
         }
-        return null;
+
+        if (usuario.email() != null && !usuario.email().equals(usuarioExistente.getEmail())) {
+            var emailEnUso = usuarioRepository.findByEmail(usuario.email());
+            if (emailEnUso.isPresent()) {
+                return false;
+            }
+            usuarioExistente.setEmail(usuario.email());
+        }
+
+        if (usuario.nombre() != null && !usuario.nombre().isBlank()) {
+            usuarioExistente.setNombre(usuario.nombre());
+        }
+        if (usuario.password() != null && !usuario.password().isBlank()) {
+            usuarioExistente.setPassword(encriptarPassword(usuario.password()));
+        }
+
+        usuarioRepository.save(usuarioExistente);
+        return true;
+    }
+
+    private String encriptarPassword(String password) {
+        // por implementar
+        return password;
     }
 }

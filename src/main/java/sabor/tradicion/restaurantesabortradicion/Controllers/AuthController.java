@@ -41,7 +41,7 @@ public class AuthController {
         UserDetails principal = User.builder()
                 .username(usuario.getEmail())
                 .password(usuario.getPassword())
-                .roles(usuario.getRol())
+                .roles(usuario.getRol().name())
                 .build();
 
         String token = jwtService.generateToken(principal);
