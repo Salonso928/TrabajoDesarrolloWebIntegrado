@@ -19,4 +19,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     @Query("SELECT r FROM Reserva r JOIN FETCH r.usuario u JOIN FETCH r.horarioTurno h JOIN FETCH r.mesa m WHERE r.fecha = :fecha")
     List<Reserva> findByFecha(@Param("fecha") LocalDate fecha);
+
+    @Query("SELECT r FROM Reserva r JOIN FETCH r.usuario u JOIN FETCH r.horarioTurno h JOIN FETCH r.mesa m WHERE r.usuario.idUsuario = :id")
+    List<Reserva> findByIdUsuario(@Param("id") Long id);
 }

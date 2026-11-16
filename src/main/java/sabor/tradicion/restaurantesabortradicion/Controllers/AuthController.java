@@ -2,12 +2,13 @@ package sabor.tradicion.restaurantesabortradicion.Controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.LoginRequest;
-import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.RegistroRequest;
-import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.RespuestaAuth;
+import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.*;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Usuario;
 import sabor.tradicion.restaurantesabortradicion.Servicios.*;
 
@@ -21,6 +22,9 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    AuthenticationManager authenticationManager;
+
 
     @PostMapping("/register")
     public ResponseEntity<?> registrar(@RequestBody RegistroRequest request) {
@@ -32,20 +36,16 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        Usuario usuario = userService.validarCredenciales(loginRequest.getEmail(), loginRequest.getPassword());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
+        //si lo de arriba no lanza excepcion, es que el usuario y contraseña son correctos
+        Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        if (usuario == null) {
-            return ResponseEntity.status(401).body("Credenciales incorrectas.");
-        }
 
-        UserDetails principal = User.builder()
-                .username(usuario.getEmail())
-                .password(usuario.getPassword())
-                .roles(usuario.getRol().name())
-                .build();
 
-        String token = jwtService.generateToken(principal);
-        RespuestaAuth respuesta = new RespuestaAuth(usuario, token);
+        String token = jwtService.generateToken(usuario);
+        LoginResponseDTO respuesta = new LoginResponseDTO(token, new UsuarioDTO(usuario.getIdUsuario(), usuario.getNombre(), usuario.getEmail(), usuario.getRol()));
 
         return ResponseEntity.ok(respuesta);
 

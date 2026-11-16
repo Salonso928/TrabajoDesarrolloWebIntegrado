@@ -3,6 +3,9 @@ package sabor.tradicion.restaurantesabortradicion.Controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import sabor.tradicion.restaurantesabortradicion.DTOs.UsuarioDTO.UsuarioUpdateDTO;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Usuario;
@@ -18,11 +21,12 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<Usuario>> obtenerTodosLosUsuarios() {
         return ResponseEntity.ok(userService.obtenerTodosLosUsuarios());
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable Long id) {
         Usuario usuario = userService.obtenerUsuarioPorId(id);
@@ -34,7 +38,12 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<String> actualizarDatos(@PathVariable Long id,@RequestBody UsuarioUpdateDTO usuarioUpdateDTO) {
-        if (usuarioUpdateDTO == null || usuarioUpdateDTO.idUsuario() != id) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        //no va a dar null ya que para entrar aqui ya se debio haber verificado que el usuario si existe
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        if (usuarioUpdateDTO == null || !usuarioUpdateDTO.idUsuario().equals(usuario.getIdUsuario())) {
             return ResponseEntity.badRequest().body("Los datos del usuario no coinciden con el ID indicado.");
         }
 

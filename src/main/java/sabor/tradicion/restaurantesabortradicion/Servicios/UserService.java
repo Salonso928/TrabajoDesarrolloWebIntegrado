@@ -1,5 +1,7 @@
 package sabor.tradicion.restaurantesabortradicion.Servicios;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.RegistroRequest;
 import sabor.tradicion.restaurantesabortradicion.DTOs.UsuarioDTO.UsuarioUpdateDTO;
@@ -12,6 +14,10 @@ import java.util.List;
 @Service
 public class UserService {
     private final UsuarioRepository usuarioRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
 
     public UserService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
@@ -26,7 +32,7 @@ public class UserService {
         Usuario nuevoUsuario = new Usuario(
                 request.getNombre(),
                 request.getEmail(),
-                request.getPassword(),
+                passwordEncoder.encode(request.getPassword()),
                 Rol.CLIENTE
         );
         usuarioRepository.save(nuevoUsuario);
@@ -66,15 +72,12 @@ public class UserService {
             usuarioExistente.setNombre(usuario.nombre());
         }
         if (usuario.password() != null && !usuario.password().isBlank()) {
-            usuarioExistente.setPassword(encriptarPassword(usuario.password()));
+            usuarioExistente.setPassword(passwordEncoder.encode(usuario.password()));
         }
 
         usuarioRepository.save(usuarioExistente);
         return true;
     }
 
-    private String encriptarPassword(String password) {
-        // por implementar
-        return password;
-    }
+
 }

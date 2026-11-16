@@ -1,13 +1,14 @@
 package sabor.tradicion.restaurantesabortradicion.Controllers;
 
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.CancelarReservaDTO;
-import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.MesaEstadoDTO;
-import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.ReservaRegistroDTO;
-import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.ReservaVistaDTO;
+import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.*;
 import sabor.tradicion.restaurantesabortradicion.Entidades.HorarioTurno;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Reserva;
+import sabor.tradicion.restaurantesabortradicion.Entidades.Usuario;
 import sabor.tradicion.restaurantesabortradicion.Servicios.ReservaService;
 
 import java.time.LocalDate;
@@ -86,5 +87,22 @@ public class ReservaController {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(reservaService.verReservasPorFecha(fechaReserva));
+    }
+
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<ReservaUserDTO>> verReservasPorUsuario(@PathVariable Long idUsuario) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        //no va a dar null ya que para entrar aqui ya se debio haber verificado que el usuario si existe
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        System.out.println("Usuario autenticado: " + usuario.getNombre() + ", ID: " + usuario.getIdUsuario());
+        System.out.println("Id del request: "+idUsuario);
+        if(!usuario.getIdUsuario().equals(idUsuario)) {
+            return ResponseEntity.badRequest().build();
+
+        }
+
+        return ResponseEntity.ok(reservaService.verReservasPorUsuario(idUsuario));
     }
 }

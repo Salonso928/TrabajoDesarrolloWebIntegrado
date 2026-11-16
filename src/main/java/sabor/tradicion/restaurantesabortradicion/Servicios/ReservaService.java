@@ -2,10 +2,7 @@ package sabor.tradicion.restaurantesabortradicion.Servicios;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.CancelarReservaDTO;
-import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.MesaEstadoDTO;
-import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.ReservaRegistroDTO;
-import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.ReservaVistaDTO;
+import sabor.tradicion.restaurantesabortradicion.DTOs.Reservas.*;
 import sabor.tradicion.restaurantesabortradicion.Entidades.EstadoMesa;
 import sabor.tradicion.restaurantesabortradicion.Entidades.EstadoReserva;
 import sabor.tradicion.restaurantesabortradicion.Entidades.HorarioTurno;
@@ -149,5 +146,10 @@ public class ReservaService {
 
     public List<HorarioTurno> getAllHorariosTurnos() {
         return horarioTurnoRepository.findAll();
+    }
+
+    public List<ReservaUserDTO> verReservasPorUsuario(Long idUsuario) {
+        var reservas = reservaRepository.findByIdUsuario(idUsuario);
+        return reservas.stream().map(ReservaUserDTO::new).collect(Collectors.toList());
     }
 }
