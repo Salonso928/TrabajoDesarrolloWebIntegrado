@@ -68,6 +68,18 @@ public class ReservaController {
         return ResponseEntity.ok("La reserva se canceló correctamente.");
     }
 
+    ///api/reservas/completar
+    @PostMapping("/completar")
+    public ResponseEntity<String> completarReserva(@RequestBody CancelarReservaDTO cancelarReserva) {
+        boolean completada = reservaService.completarReserva(cancelarReserva);
+
+        if (!completada) {
+            return ResponseEntity.badRequest()
+                    .body("Error al completar la reserva");
+        }
+        return ResponseEntity.ok("La reserva se completó correctamente.");
+    }
+
     @GetMapping("/reserva/{id}")
     public ResponseEntity<ReservaVistaDTO> verReserva(@PathVariable Long id) {
         var reserva = reservaService.verReserva(id);

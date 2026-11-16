@@ -112,8 +112,8 @@ public class ReservaService {
 
     public boolean cancelarReserva(CancelarReservaDTO cancelarReserva) {
         Reserva reserva = reservaRepository.findById(cancelarReserva.idReserva()).orElse(null);
-        if (reserva == null || reserva.getEstado() == EstadoReserva.CANCELADA) {
-            //la reserva no existe o ya fue cancelada
+        if (reserva == null || reserva.getEstado() == EstadoReserva.CANCELADA || reserva.getEstado() == EstadoReserva.COMPLETADA) {
+            //la reserva no existe o ya fue cancelada/completada
             return false;
         }
 
@@ -123,6 +123,22 @@ public class ReservaService {
         }
 
         reserva.setEstado(EstadoReserva.CANCELADA);
+        reservaRepository.save(reserva);
+        return true;
+    }
+    public boolean completarReserva(CancelarReservaDTO cancelarReserva) {
+        Reserva reserva = reservaRepository.findById(cancelarReserva.idReserva()).orElse(null);
+        if (reserva == null || reserva.getEstado() == EstadoReserva.CANCELADA || reserva.getEstado() == EstadoReserva.COMPLETADA) {
+            //la reserva no existe o ya fue cancelada
+            return false;
+        }
+
+        if(!reserva.getUsuario().getIdUsuario().equals(cancelarReserva.idUsuario())) {
+            //La reserva no le pertenece al usuario que intenta cancelarla
+            return false;
+        }
+
+        reserva.setEstado(EstadoReserva.COMPLETADA);
         reservaRepository.save(reserva);
         return true;
     }
