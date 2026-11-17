@@ -85,7 +85,6 @@ public class GlobalExceptionHandler {
         String mensaje;
 
         if (ex instanceof MethodArgumentNotValidException validEx) {
-            // Extrae solo tus mensajes personalizados ("La contraseña es obligatoria", etc.)
             mensaje = validEx.getBindingResult().getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
                     .collect(Collectors.joining(", "));

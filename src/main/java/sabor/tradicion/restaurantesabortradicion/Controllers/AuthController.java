@@ -1,5 +1,9 @@
 package sabor.tradicion.restaurantesabortradicion.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +17,10 @@ import sabor.tradicion.restaurantesabortradicion.DTOs.AuthDTO.*;
 import sabor.tradicion.restaurantesabortradicion.Entidades.Usuario;
 import sabor.tradicion.restaurantesabortradicion.Servicios.*;
 
+@Tag(
+        name = "Autenticación",
+        description = "Servicios para el registro de usuarios y autenticación en el sistema"
+)
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")//para que cualquier frontend pueda acceder
@@ -26,6 +34,15 @@ public class AuthController {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    @Operation(
+            summary = "Registrar usuario",
+            description = "Registra un nuevo usuario en el sistema Sabor y Tradición. Recibe nombre, correo electrónico y contraseña."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario registrado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Los datos proporcionados no son válidos"),
+            @ApiResponse(responseCode = "409", description = "El correo electrónico ya se encuentra registrado")
+    })
 
     @PostMapping("/register")
     public ResponseEntity<?> registrar(@RequestBody RegistroRequest request) {
@@ -35,6 +52,15 @@ public class AuthController {
         }
         return ResponseEntity.ok("¡Usuario registrado con éxito!");
     }
+    @Operation(
+            summary = "Iniciar sesión",
+            description = "Autentica a un usuario mediante su correo electrónico y contraseña. Permite obtener las credenciales de acceso al sistema."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Autenticación exitosa"),
+            @ApiResponse(responseCode = "401", description = "Credenciales incorrectas"),
+            @ApiResponse(responseCode = "400", description = "Datos de autenticación inválidos")
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
 

@@ -1,0 +1,829 @@
+openapi: 3.1.0
+info:
+  title: API Backend
+  description: Documentación de los servicios REST del backend del restaurante Sabor
+    y Tradición.
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Reservas
+  description: "Servicios para gestionar reservas, consultar disponibilidad de mesas\
+    \ y administrar horarios del restaurante"
+- name: Usuarios
+  description: Servicios para consultar y administrar la información de los usuarios
+    registrados
+- name: Autenticación
+  description: Servicios para el registro de usuarios y autenticación en el sistema
+paths:
+  /api/users/{id}:
+    get:
+      tags:
+      - Usuarios
+      summary: Consultar usuario por ID
+      description: Obtiene la información de un usuario específico mediante su identificador.
+      operationId: obtenerUsuarioPorId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Usuario encontrado
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Usuario"
+        "404":
+          description: No se encontró el usuario solicitado
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Usuario"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - Usuarios
+      summary: Actualizar datos del usuario
+      description: "Permite modificar la información de un usuario existente, como\
+        \ su nombre, correo electrónico y contraseña."
+      operationId: actualizarDatos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioUpdateDTO"
+        required: true
+      responses:
+        "200":
+          description: Datos actualizados correctamente
+          content:
+            '*/*':
+              schema:
+                type: string
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Usuario no encontrado
+          content:
+            '*/*':
+              schema:
+                type: string
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/reservas/realizar:
+    post:
+      tags:
+      - Reservas
+      summary: Realizar reserva
+      description: "Registra una nueva reserva indicando el usuario, mesa, fecha,\
+        \ cantidad de personas y horario seleccionado."
+      operationId: realizarReserva
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservaRegistroDTO"
+        required: true
+      responses:
+        "200":
+          description: Reserva registrada correctamente
+          content:
+            '*/*':
+              schema:
+                type: string
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: La mesa no está disponible para el horario solicitado
+          content:
+            '*/*':
+              schema:
+                type: string
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/reservas/completar:
+    post:
+      tags:
+      - Reservas
+      summary: Completar reserva
+      description: Permite cambiar el estado de una reserva a COMPLETADA mediante
+        los identificadores del usuario y de la reserva.
+      operationId: completarReserva
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CancelarReservaDTO"
+        required: true
+      responses:
+        "200":
+          description: Reserva completada correctamente
+          content:
+            '*/*':
+              schema:
+                type: string
+        "404":
+          description: Reserva o usuario no encontrado
+          content:
+            '*/*':
+              schema:
+                type: string
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/reservas/cancelar:
+    post:
+      tags:
+      - Reservas
+      summary: Cancelar reserva
+      description: "Permite cancelar una reserva registrada, identificando al usuario\
+        \ y la reserva correspondiente."
+      operationId: cancelarReserva
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CancelarReservaDTO"
+        required: true
+      responses:
+        "200":
+          description: Reserva cancelada correctamente
+          content:
+            '*/*':
+              schema:
+                type: string
+        "404":
+          description: Reserva o usuario no encontrado
+          content:
+            '*/*':
+              schema:
+                type: string
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/auth/register:
+    post:
+      tags:
+      - Autenticación
+      summary: Registrar usuario
+      description: "Registra un nuevo usuario en el sistema Sabor y Tradición. Recibe\
+        \ nombre, correo electrónico y contraseña."
+      operationId: registrar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistroRequest"
+        required: true
+      responses:
+        "200":
+          description: Usuario registrado correctamente
+          content:
+            '*/*':
+              schema:
+                type: object
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: El correo electrónico ya se encuentra registrado
+          content:
+            '*/*':
+              schema:
+                type: object
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/auth/login:
+    post:
+      tags:
+      - Autenticación
+      summary: Iniciar sesión
+      description: Autentica a un usuario mediante su correo electrónico y contraseña.
+        Permite obtener las credenciales de acceso al sistema.
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: Autenticación exitosa
+          content:
+            '*/*':
+              schema:
+                type: object
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/users:
+    get:
+      tags:
+      - Usuarios
+      summary: Listar usuarios
+      description: Obtiene el listado completo de usuarios registrados en el sistema.
+      operationId: obtenerTodosLosUsuarios
+      responses:
+        "200":
+          description: Listado de usuarios obtenido correctamente
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Usuario"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/reservas/usuario/{idUsuario}:
+    get:
+      tags:
+      - Reservas
+      summary: Consultar reservas por usuario
+      description: "Obtiene el historial de reservas realizadas por un usuario especí\
+        fico, incluyendo fecha, horario y estado."
+      operationId: verReservasPorUsuario
+      parameters:
+      - name: idUsuario
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Reservas obtenidas correctamente
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReservaUserDTO"
+        "404":
+          description: Usuario no encontrado
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReservaUserDTO"
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/reservas/reserva/{id}:
+    get:
+      tags:
+      - Reservas
+      summary: Consultar detalle de reserva
+      description: "Obtiene toda la información de una reserva específica, incluyendo\
+        \ los datos de la mesa, usuario, fecha, horario y estado."
+      operationId: verReserva
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Detalle de reserva obtenido correctamente
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ReservaVistaDTO"
+        "404":
+          description: Reserva no encontrada
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ReservaVistaDTO"
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/reservas/mesas:
+    get:
+      tags:
+      - Reservas
+      summary: Consultar estado de mesas
+      description: Obtiene el estado de disponibilidad de las mesas del restaurante
+        para una fecha y turno determinados.
+      operationId: obtenerEstadoMesas
+      parameters:
+      - name: fecha
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: turnoId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Estado de mesas consultado correctamente
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MesaEstadoDTO"
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/reservas/horarios:
+    get:
+      tags:
+      - Reservas
+      summary: Consultar horarios y turnos
+      description: Obtiene los horarios y turnos configurados para realizar reservas
+        en el restaurante.
+      operationId: obtenerHorariosTurnos
+      responses:
+        "200":
+          description: Horarios obtenidos correctamente
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HorarioTurno"
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+  /api/reservas/fecha/{fecha}:
+    get:
+      tags:
+      - Reservas
+      summary: Consultar reservas por fecha
+      description: "Obtiene el listado de reservas registradas para una fecha especí\
+        fica, incluyendo información de mesas, usuarios y horarios."
+      operationId: verReservasPorFecha
+      parameters:
+      - name: fecha
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Reservas obtenidas correctamente
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReservaVistaDTO"
+        "400":
+          description: Error en los datos enviados o validaciones
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Credenciales incorrectas o usuario no autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Token inválido, expirado o permisos insuficientes"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    UsuarioUpdateDTO:
+      type: object
+      properties:
+        idUsuario:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    ReservaRegistroDTO:
+      type: object
+      properties:
+        idReserva:
+          type: integer
+          format: int64
+        idMesa:
+          type: integer
+          format: int64
+        idUsuario:
+          type: integer
+          format: int64
+        fecha:
+          type: string
+        nroPersonas:
+          type: integer
+          format: int32
+        idHorarioTurno:
+          type: integer
+          format: int64
+    CancelarReservaDTO:
+      type: object
+      properties:
+        idUsuario:
+          type: integer
+          format: int64
+        idReserva:
+          type: integer
+          format: int64
+    RegistroRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - password
+    GrantedAuthority:
+      type: object
+      properties:
+        authority:
+          type: string
+    Usuario:
+      type: object
+      properties:
+        idUsuario:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        rol:
+          type: string
+          enum:
+          - CLIENTE
+          - EMPLEADO
+          - ADMIN
+        authorities:
+          type: array
+          items:
+            $ref: "#/components/schemas/GrantedAuthority"
+        username:
+          type: string
+        enabled:
+          type: boolean
+        accountNonExpired:
+          type: boolean
+        accountNonLocked:
+          type: boolean
+        credentialsNonExpired:
+          type: boolean
+    ReservaUserDTO:
+      type: object
+      properties:
+        idReserva:
+          type: integer
+          format: int64
+        idMesa:
+          type: integer
+          format: int64
+        fechaReserva:
+          type: string
+          format: date-time
+        fecha:
+          type: string
+          format: date
+        horario:
+          type: string
+        estado:
+          type: string
+          enum:
+          - COMPLETADA
+          - CANCELADA
+          - PENDIENTE
+    HorarioTurno:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        horaInicio:
+          type: string
+          format: time-local
+        horaFin:
+          type: string
+          format: time-local
+        descripcion:
+          type: string
+    Mesa:
+      type: object
+      properties:
+        idMesa:
+          type: integer
+          format: int64
+        estado:
+          type: string
+          enum:
+          - DISPONIBLE
+          - RESERVADO
+          - EN_MANTENIMIENTO
+        capacidadMaxima:
+          type: integer
+          format: int32
+    ReservaVistaDTO:
+      type: object
+      properties:
+        idReserva:
+          type: integer
+          format: int64
+        mesa:
+          $ref: "#/components/schemas/Mesa"
+        usuario:
+          $ref: "#/components/schemas/UsuarioVistaDTO"
+        fecha:
+          type: string
+        fechaReserva:
+          type: string
+        nroPersonas:
+          type: integer
+          format: int32
+        horarioTurno:
+          $ref: "#/components/schemas/HorarioTurno"
+        estado:
+          type: string
+          enum:
+          - COMPLETADA
+          - CANCELADA
+          - PENDIENTE
+    UsuarioVistaDTO:
+      type: object
+      properties:
+        idUsuario:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+    MesaEstadoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        capacidadMaxima:
+          type: integer
+          format: int32
+        estado:
+          type: string
+    ErrorResponse:
+      description: Estructura estándar de respuesta de error
+      properties:
+        status:
+          description: Código HTTP del error
+          example: 400
+        error:
+          description: Tipo de error
+          example: Bad Request
+        message:
+          description: Mensaje descriptivo del error
+        path:
+          description: Ruta donde ocurrió el error
+          example: /api/users
+        timestamp:
+          format: date-time
+          description: Fecha y hora del error
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
